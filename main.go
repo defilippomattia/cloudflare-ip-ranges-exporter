@@ -85,7 +85,7 @@ func detectIpRangesChange(rangesUrl string) {
 
 	if changed {
 		cloudflareIpRangesChanged.Set(1)
-		log.Printf("cloudflare ip ranges have changed, go check https://www.cloudflare.com/ips-v4")
+		log.Printf("cloudflare ip ranges might have changed, go check https://www.cloudflare.com/ips-v4")
 	} else {
 		cloudflareIpRangesChanged.Set(0)
 		log.Printf("cloudflare ip ranges have NOT changed.")
