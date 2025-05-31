@@ -8,7 +8,19 @@ This can be useful if you have a server which allows only connections coming fro
 
 (wip, check issues)
 
+
+# How to run
+
 ```
 go run main.go
-http://localhost:2112/metrics
+If you want to specify different config params:
+go run main.go --port=2541 --url=https://www.cloudflare.com/ips-v4 --interval=6
+http://localhost:2541/metrics
 ```
+
+## Flags
+| Flag         | Type   | Default Value                      | Description                                                                 |
+|--------------|--------|------------------------------------|-----------------------------------------------------------------------------|
+| `--port`     | string | `2541`                             | The port number on which the HTTP metrics server will listen. Must be between `1` and `65535`. |
+| `--url`      | string | `https://www.cloudflare.com/ips-v4`| The URL to fetch the list of Cloudflare IPv4 ranges from. Must be a valid HTTP(S) URL (this is not meant to be changed, this flag was added so I can pass some local server URL which simulates cloudflares response for testing) |
+| `--interval` | string | `6`                                | Interval in hours to check for changes in the IP ranges. Must be a positive integer. |

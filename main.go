@@ -2,8 +2,11 @@ package main
 
 import (
 	"bufio"
+	"flag"
 	"fmt"
 	"net/http"
+	"os"
+	"strconv"
 	"strings"
 	"time"
 
@@ -35,8 +38,7 @@ var cloudflareIpRangesChanged = promauto.NewGauge(prometheus.GaugeOpts{
 	Help: "1 if there has been a change in https://www.cloudflare.com/ips-v4, 0 otherwise",
 })
 
-func fetchLiveIpRanges() (map[string]struct{}, error) {
-	rangesUrl := "https://www.cloudflare.com/ips-v4"
+func fetchLiveIpRanges(rangesUrl string) (map[string]struct{}, error) {
 	client := http.Client{
 		Timeout: 5 * time.Second,
 	}
@@ -60,8 +62,8 @@ func fetchLiveIpRanges() (map[string]struct{}, error) {
 	return liveIpRanges, nil
 }
 
-func detectIpRangesChange() {
-	liveIpRanges, err := fetchLiveIpRanges()
+func detectIpRangesChange(rangesUrl string) {
+	liveIpRanges, err := fetchLiveIpRanges(rangesUrl)
 	if err != nil {
 		fmt.Println("error fetching live IP ranges:", err)
 		return
@@ -91,12 +93,39 @@ func detectIpRangesChange() {
 }
 
 func main() {
+	portStr := flag.String("port", "2541", "Port to expose metrics on")
+	url := flag.String("url", "https://www.cloudflare.com/ips-v4", "URL to fetch Cloudflare IP ranges from")
+	intervalStr := flag.String("interval", "6", "Interval (in hours) to check for IP range changes")
+	flag.Parse()
+
+	port, err := strconv.Atoi(*portStr)
+	if err != nil || port < 1 || port > 65535 {
+		fmt.Fprintf(os.Stderr, "invalid port: %s (must be a number between 1 and 65535)\n", *portStr)
+		os.Exit(1)
+	}
+
+	intervalHours, err := strconv.Atoi(*intervalStr)
+	if err != nil || intervalHours <= 0 {
+		fmt.Fprintf(os.Stderr, "invalid interval: %s (must be a positive integer)\n", *intervalStr)
+		os.Exit(1)
+	}
+
+	//print config on start...
+	interval := time.Duration(intervalHours) * time.Hour
+
 	go func() {
 		for {
-			detectIpRangesChange()
-			time.Sleep(6 * time.Hour)
+			fmt.Println("detecting changes..")
+			detectIpRangesChange(*url)
+			time.Sleep(interval)
 		}
 	}()
 	http.Handle("/metrics", promhttp.Handler())
-	http.ListenAndServe(":2112", nil)
+	addr := fmt.Sprintf("0.0.0.0:%s", *portStr)
+	fmt.Printf("starting metrics server on %s\n", addr)
+	err = http.ListenAndServe(addr, nil)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "failed to start server: %v\n", err)
+		os.Exit(1)
+	}
 }
