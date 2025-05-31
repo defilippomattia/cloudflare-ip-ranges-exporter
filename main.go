@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"flag"
 	"fmt"
+	"log"
 	"net/http"
 	"os"
 	"strconv"
@@ -84,10 +85,10 @@ func detectIpRangesChange(rangesUrl string) {
 
 	if changed {
 		cloudflareIpRangesChanged.Set(1)
-		fmt.Println("cloudflare ip ranges have changed, go check https://www.cloudflare.com/ips-v4")
+		log.Printf("cloudflare ip ranges might have changed, go check https://www.cloudflare.com/ips-v4")
 	} else {
 		cloudflareIpRangesChanged.Set(0)
-		fmt.Println("cloudflare ip ranges have NOT changed.")
+		log.Printf("cloudflare ip ranges have NOT changed.")
 	}
 
 }
@@ -97,35 +98,44 @@ func main() {
 	url := flag.String("url", "https://www.cloudflare.com/ips-v4", "URL to fetch Cloudflare IP ranges from")
 	intervalStr := flag.String("interval", "6", "Interval (in hours) to check for IP range changes")
 	flag.Parse()
+	exitApp := false
 
 	port, err := strconv.Atoi(*portStr)
 	if err != nil || port < 1 || port > 65535 {
-		fmt.Fprintf(os.Stderr, "invalid port: %s (must be a number between 1 and 65535)\n", *portStr)
-		os.Exit(1)
+		log.Printf("[ERROR] invalid port: %s (must be between 1 and 65535)", *portStr)
+		exitApp = true
 	}
-
 	intervalHours, err := strconv.Atoi(*intervalStr)
 	if err != nil || intervalHours <= 0 {
-		fmt.Fprintf(os.Stderr, "invalid interval: %s (must be a positive integer)\n", *intervalStr)
-		os.Exit(1)
+		log.Printf("[ERROR] invalid interval: %s (must be a positive integer)", *intervalStr)
+		exitApp = true
 	}
 
-	//print config on start...
+	if exitApp {
+		os.Exit(1)
+	}
+	log.Printf("####### start configuration values #######")
+	log.Printf("Port: %d", port)
+	log.Printf("URL: %s", *url)
+	log.Printf("Interval: %d hour(s)", intervalHours)
+	log.Printf("####### end configuration values #######")
+
 	interval := time.Duration(intervalHours) * time.Hour
 
 	go func() {
 		for {
-			fmt.Println("detecting changes..")
+			log.Printf("detecting changes..")
 			detectIpRangesChange(*url)
+			log.Printf("sleeping for %d hour(s)", intervalHours)
 			time.Sleep(interval)
 		}
 	}()
 	http.Handle("/metrics", promhttp.Handler())
 	addr := fmt.Sprintf("0.0.0.0:%s", *portStr)
-	fmt.Printf("starting metrics server on %s\n", addr)
+	log.Printf("starting metrics server on %s\n", addr)
 	err = http.ListenAndServe(addr, nil)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "failed to start server: %v\n", err)
+		log.Printf("[ERROR] failed to start server: %v", err)
 		os.Exit(1)
 	}
 }
