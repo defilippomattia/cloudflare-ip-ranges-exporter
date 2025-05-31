@@ -5,11 +5,8 @@ Prometheus exporter that monitors Cloudflare's published IPv4 address ranges (ht
 This can be useful if you have a server which allows only connections coming from Cloudflare (e.g in your firewall rich rules) and you want to be informed if there were some changes in the IP ranges.
 
 # How to run
-
 (wip, check issues)
 
-
-# How to run
 
 ```
 go run main.go
