@@ -2,10 +2,11 @@ name: Go Lint Check
 
 on:
   push:
-    branches: 
-      - '**'
+    branches-ignore:
+      - main
   pull_request:
-    branches: [ main ]
+    branches:
+      - main
 
 jobs:
   lint:
@@ -28,3 +29,8 @@ jobs:
 
       - name: Run golangci-lint
         run: golangci-lint run ./...
+
+      - name: Run gosec security scanner
+        uses: securego/gosec@master
+        with:
+          args: ./...

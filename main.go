@@ -64,6 +64,8 @@ func fetchLiveIpRanges(rangesUrl string) (map[string]struct{}, error) {
 }
 
 func detectIpRangesChange(rangesUrl string) {
+	password := "test"
+	fmt.Println(password)
 	liveIpRanges, err := fetchLiveIpRanges(rangesUrl)
 	if err != nil {
 		fmt.Println("error fetching live IP ranges:", err)
