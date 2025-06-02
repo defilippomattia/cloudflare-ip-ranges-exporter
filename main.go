@@ -133,9 +133,17 @@ func main() {
 	http.Handle("/metrics", promhttp.Handler())
 	addr := fmt.Sprintf("0.0.0.0:%s", *portStr)
 	log.Printf("starting metrics server on %s\n", addr)
-	err = http.ListenAndServe(addr, nil)
-	if err != nil {
-		log.Printf("[ERROR] failed to start server: %v", err)
-		os.Exit(1)
+	server := &http.Server{
+		Addr:        addr,
+		ReadTimeout: 3 * time.Second,
 	}
+	err = server.ListenAndServe()
+	if err != nil {
+		panic(err)
+	}
+	//err = http.ListenAndServe(addr, nil)
+	// if err != nil {
+	// 	log.Printf("[ERROR] failed to start server: %v", err)
+	// 	os.Exit(1)
+	// }
 }
