@@ -9,29 +9,35 @@ on:
       - main
 
 jobs:
-  golangci:
+  golint:
     name: go-lint
     runs-on: ubuntu-latest
     steps:
       # https://github.com/actions/checkout
       - name: Checkout source code
         uses: actions/checkout@v4
-        
-      - uses: actions/setup-go@v5
+
+      # https://github.com/actions/setup-go  
+      - name: Download go
+        uses: actions/setup-go@v5
         with:
           go-version: 1.23.4
+
+      # https://github.com/golangci/golangci-lint-action
       - name: golangci-lint
         uses: golangci/golangci-lint-action@v8
         with:
-          version: v2.1
+          version: v2.1.6
 
   gosec:
+    name: gosec
     runs-on: ubuntu-latest
-    env:
-      GO111MODULE: on
     steps:
-      - name: Checkout Source
-        uses: actions/checkout@v3
+      # https://github.com/actions/checkout
+      - name: Checkout source code
+        uses: actions/checkout@v4
+        
+      # https://github.com/marketplace/actions/gosec-security-checker
       - name: Run Gosec Security Scanner
         uses: securego/gosec@master
         with:
