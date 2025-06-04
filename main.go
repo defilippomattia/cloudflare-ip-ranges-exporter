@@ -47,7 +47,7 @@ func fetchLiveIpRanges(rangesUrl string) (map[string]struct{}, error) {
 	if err != nil {
 		return nil, err
 	}
-	defer resp.Body.Close()
+	defer resp.Body.Close() //nolint:errcheck
 
 	liveIpRanges := make(map[string]struct{})
 	scanner := bufio.NewScanner(resp.Body)
