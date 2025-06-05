@@ -1,0 +1,76 @@
+name: ci
+
+env:
+  GO_VERSION: 1.24.4
+
+on:
+  push:
+    branches-ignore:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  golint:
+    name: go-lint
+    runs-on: ubuntu-latest
+    steps:
+      # https://github.com/actions/checkout
+      - name: Checkout source code
+        uses: actions/checkout@v4
+
+      # https://github.com/actions/setup-go  
+      - name: Download go
+        uses: actions/setup-go@v5
+        with:
+          go-version: ${{ env.GO_VERSION }}
+
+      # https://github.com/golangci/golangci-lint-action
+      - name: golangci-lint
+        uses: golangci/golangci-lint-action@v8
+        with:
+          version: v2.1.6
+
+  gosec:
+    name: gosec
+    runs-on: ubuntu-latest
+    steps:
+      # https://github.com/actions/checkout
+      - name: Checkout source code
+        uses: actions/checkout@v4
+        
+      # https://github.com/marketplace/actions/gosec-security-checker
+      - name: Run Gosec Security Scanner
+        uses: securego/gosec@master
+        with:
+          args: ./...
+    
+  govulncheck:
+    name: govulncheck
+    runs-on: ubuntu-latest
+    steps:
+    # https://github.com/golang/govulncheck-action
+    - name: Run govulncheck vulnerabilities scanner 
+      uses: golang/govulncheck-action@v1
+      with:
+          go-version-input: ${{ env.GO_VERSION }}
+          go-package: ./...
+
+  gotest:
+    name: go-test
+    runs-on: ubuntu-latest
+    steps:
+      # https://github.com/actions/checkout
+      - name: Checkout source code
+        uses: actions/checkout@v4
+
+      # https://github.com/actions/setup-go  
+      - name: Download Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: ${{ env.GO_VERSION }}
+
+      - name: Run Go tests
+        run: |
+          go test -v ./...

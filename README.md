@@ -1,3 +1,5 @@
+[![ci](https://github.com/defilippomattia/cloudflare-ip-ranges-exporter/actions/workflows/cicd.yml/badge.svg?branch=main)](https://github.com/defilippomattia/cloudflare-ip-ranges-exporter/actions/workflows/cicd.yml)
+
 # Introduction
 
 Prometheus exporter that monitors Cloudflare's published IPv4 address ranges (https://www.cloudflare.com/ips-v4/) and detects changes compared to a hardcoded baseline. It periodically fetches the current IP list from Cloudflare's public URL and exposes a Prometheus metric (cloudflare_ip_ranges_changed) indicating whether the list has changed.
