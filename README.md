@@ -1,4 +1,4 @@
-![CI](https://github.com/defilippomattia/cloudflare-ip-ranges-exporter/actions/workflows/ci.yml/badge.svg)
+[![ci](https://github.com/defilippomattia/cloudflare-ip-ranges-exporter/actions/workflows/cicd.yml/badge.svg?branch=main)](https://github.com/defilippomattia/cloudflare-ip-ranges-exporter/actions/workflows/cicd.yml)
 
 # Introduction
 
