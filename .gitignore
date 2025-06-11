@@ -1,0 +1,4 @@
+notes.log
+
+git tag -a v1.0.0 -m "Release: adds new feature X and bugfix Y"
+git push origin v1.0.0
