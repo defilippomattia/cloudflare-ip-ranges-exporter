@@ -13,7 +13,8 @@ env:
 
 on:
   push:
-    - main
+    branches:
+      - main
 
 
 jobs:
