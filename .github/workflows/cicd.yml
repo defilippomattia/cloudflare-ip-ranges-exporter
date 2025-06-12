@@ -112,11 +112,9 @@ jobs:
     needs: [golint, gosec, govulncheck, gotest]
     if: startsWith(github.ref, 'refs/tags/')
     steps:
-      # https://github.com/actions/checkout
       - name: Checkout source code
         uses: actions/checkout@v4
 
-      # https://github.com/actions/setup-go  
       - name: Download Go
         uses: actions/setup-go@v5
         with:
