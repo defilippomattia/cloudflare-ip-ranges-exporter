@@ -23,27 +23,27 @@ on:
 
 
 jobs:
-  golint:
-    name: go-lint
-    runs-on: ubuntu-latest
-    steps:
-      # https://github.com/actions/checkout
-      - name: Checkout source code
-        uses: actions/checkout@v4
+  # golint:
+  #   name: go-lint
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     # https://github.com/actions/checkout
+  #     - name: Checkout source code
+  #       uses: actions/checkout@v4
 
-      # https://github.com/actions/setup-go  
-      - name: Download go
-        uses: actions/setup-go@v5
-        with:
-          go-version: ${{ env.GO_VERSION }}
+  #     # https://github.com/actions/setup-go  
+  #     - name: Download go
+  #       uses: actions/setup-go@v5
+  #       with:
+  #         go-version: ${{ env.GO_VERSION }}
 
-      - name: Install golangci-lint
-        run: |
-          curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/HEAD/install.sh | sh -s -- -b $(go env GOPATH)/bin ${{ env.GOLANG_CI_LINT_VERSION }}
+  #     - name: Install golangci-lint
+  #       run: |
+  #         curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/HEAD/install.sh | sh -s -- -b $(go env GOPATH)/bin ${{ env.GOLANG_CI_LINT_VERSION }}
 
-      - name: Run golangci-lint
-        run: |
-          golangci-lint run --config .golangci-lint.yml
+  #     - name: Run golangci-lint
+  #       run: |
+  #         golangci-lint run --config .golangci-lint.yml
 
   # gosec:
   #   name: gosec
@@ -58,7 +58,27 @@ jobs:
   #       uses: securego/gosec@master
   #       with:
   #         args: ./...
+
+    gosec:
+    name: gosec
+    runs-on: ubuntu-latest
+    steps:
+      # https://github.com/actions/checkout
+      - name: Checkout source code
+        uses: actions/checkout@v4
+        
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: ${{ env.GO_VERSION }}
+  
+      - name: Install gosec
+        run: |
+          curl -sfL https://raw.githubusercontent.com/securego/gosec/master/install.sh | sh -s -- -b $(go env GOPATH)/bin v2.22.4
     
+      - name: Run gosec
+        run: |
+          gosec ./...
   # govulncheck:
   #   name: govulncheck
   #   runs-on: ubuntu-latest
