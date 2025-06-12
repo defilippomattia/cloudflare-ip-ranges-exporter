@@ -60,25 +60,25 @@ jobs:
   #         args: ./...
 
     gosec:
-    name: gosec
-    runs-on: ubuntu-latest
-    steps:
-      # https://github.com/actions/checkout
-      - name: Checkout source code
-        uses: actions/checkout@v4
-        
-      - name: Setup Go
-        uses: actions/setup-go@v5
-        with:
-          go-version: ${{ env.GO_VERSION }}
-  
-      - name: Install gosec
-        run: |
-          curl -sfL https://raw.githubusercontent.com/securego/gosec/master/install.sh | sh -s -- -b $(go env GOPATH)/bin v2.22.4
+      name: gosec
+      runs-on: ubuntu-latest
+      steps:
+        # https://github.com/actions/checkout
+        - name: Checkout source code
+          uses: actions/checkout@v4
+          
+        - name: Setup Go
+          uses: actions/setup-go@v5
+          with:
+            go-version: ${{ env.GO_VERSION }}
     
-      - name: Run gosec
-        run: |
-          gosec ./...
+        - name: Install gosec
+          run: |
+            curl -sfL https://raw.githubusercontent.com/securego/gosec/master/install.sh | sh -s -- -b $(go env GOPATH)/bin v2.22.4
+      
+        - name: Run gosec
+          run: |
+            gosec ./...
   # govulncheck:
   #   name: govulncheck
   #   runs-on: ubuntu-latest
