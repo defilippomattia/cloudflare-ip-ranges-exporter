@@ -94,29 +94,57 @@ func detectIpRangesChange(rangesUrl string) {
 }
 
 func main() {
-	portStr := flag.String("port", "2541", "Port to expose metrics on")
-	url := flag.String("url", "https://www.cloudflare.com/ips-v4", "URL to fetch Cloudflare IP ranges from")
-	intervalStr := flag.String("interval", "6", "Interval (in hours) to check for IP range changes")
-	flag.Parse()
-	exitApp := false
+	defaultPort := "2541"
+	defaultURL := "https://www.cloudflare.com/ips-v4"
+	defaultInterval := "6"
 
-	port, err := strconv.Atoi(*portStr)
+	portStr := flag.String("port", "", "Port to expose metrics on (env: CFIRE_PORT)")
+	url := flag.String("url", "", "URL to fetch Cloudflare IP ranges from (env: CFIRE_URL)")
+	intervalStr := flag.String("interval", "", "Interval (in hours) to check for IP range changes (env: CFIRE_INTERVAL)")
+
+	flag.Parse()
+
+	finalPort := defaultPort
+	if *portStr != "" {
+		finalPort = *portStr
+	} else if envPort := os.Getenv("CFIRE_PORT"); envPort != "" {
+		finalPort = envPort
+	}
+
+	finalURL := defaultURL
+	if *url != "" {
+		finalURL = *url
+	} else if envURL := os.Getenv("CFIRE_URL"); envURL != "" {
+		finalURL = envURL
+	}
+
+	finalInterval := defaultInterval
+	if *intervalStr != "" {
+		finalInterval = *intervalStr
+	} else if envInterval := os.Getenv("CFIRE_INTERVAL"); envInterval != "" {
+		finalInterval = envInterval
+	}
+
+	exitApp := false
+	port, err := strconv.Atoi(finalPort)
 	if err != nil || port < 1 || port > 65535 {
-		log.Printf("[ERROR] invalid port: %s (must be between 1 and 65535)", *portStr)
+		log.Printf("[ERROR] invalid port: %s (must be between 1 and 65535)", finalPort)
 		exitApp = true
 	}
-	intervalHours, err := strconv.Atoi(*intervalStr)
+
+	intervalHours, err := strconv.Atoi(finalInterval)
 	if err != nil || intervalHours <= 0 {
-		log.Printf("[ERROR] invalid interval: %s (must be a positive integer)", *intervalStr)
+		log.Printf("[ERROR] invalid interval: %s (must be a positive integer)", finalInterval)
 		exitApp = true
 	}
 
 	if exitApp {
 		os.Exit(1)
 	}
+
 	log.Printf("####### start configuration values #######")
 	log.Printf("Port: %d", port)
-	log.Printf("URL: %s", *url)
+	log.Printf("URL: %s", finalURL)
 	log.Printf("Interval: %d hour(s)", intervalHours)
 	log.Printf("####### end configuration values #######")
 
@@ -125,13 +153,14 @@ func main() {
 	go func() {
 		for {
 			log.Printf("detecting changes..")
-			detectIpRangesChange(*url)
+			detectIpRangesChange(finalURL)
 			log.Printf("sleeping for %d hour(s)", intervalHours)
 			time.Sleep(interval)
 		}
 	}()
+
 	http.Handle("/metrics", promhttp.Handler())
-	addr := fmt.Sprintf("0.0.0.0:%s", *portStr)
+	addr := fmt.Sprintf("0.0.0.0:%d", port)
 	log.Printf("starting metrics server on %s\n", addr)
 	server := &http.Server{
 		Addr:        addr,
@@ -141,9 +170,4 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	//err = http.ListenAndServe(addr, nil)
-	// if err != nil {
-	// 	log.Printf("[ERROR] failed to start server: %v", err)
-	// 	os.Exit(1)
-	// }
 }
