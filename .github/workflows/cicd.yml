@@ -123,7 +123,7 @@ jobs:
         run: |
           cd dist
           sha256sum * > sha256sums.txt
-          cat sha256sum.txt
+          cat sha256sums.txt
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
