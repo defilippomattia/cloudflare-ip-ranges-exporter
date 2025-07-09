@@ -20,6 +20,3 @@ COPY --from=builder /app/cfire .
 COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
 
 ENTRYPOINT ["/app/cfire"]
-
-
-#docker run --rm -e CFIRE_PORT=8888 -p 5000:8888 cfire-monitor
